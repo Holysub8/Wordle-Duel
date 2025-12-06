@@ -1,0 +1,920 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Wordle Duel</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background: #111827;
+            color: #e5e7eb;
+            display: flex;
+            justify-content: center;
+            padding: 20px;
+        }
+        .container {
+            max-width: 600px;
+            width: 100%;
+            background: #020617;
+            border-radius: 12px;
+            padding: 20px 24px 28px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.6);
+        }
+        h1, h2, h3 {
+            text-align: center;
+            margin-bottom: 16px;
+        }
+        h1 {
+            letter-spacing: 2px;
+        }
+        button {
+            padding: 8px 16px;
+            border-radius: 8px;
+            border: none;
+            cursor: pointer;
+            font-weight: 600;
+            margin-top: 8px;
+        }
+        .btn-primary {
+            background: #22c55e;
+            color: #022c22;
+        }
+        .btn-secondary {
+            background: #0ea5e9;
+            color: #082f49;
+        }
+        .btn-ghost {
+            background: transparent;
+            border: 1px solid #4b5563;
+            color: #e5e7eb;
+        }
+        .btn-disabled {
+            opacity: 0.4;
+            cursor: default;
+        }
+        .section {
+            margin-top: 18px;
+            padding: 14px 16px;
+            border-radius: 10px;
+            background: #020617;
+            border: 1px solid #1f2937;
+        }
+        label {
+            display: block;
+            margin-top: 8px;
+            font-size: 0.9rem;
+        }
+        input[type="text"] {
+            width: 100%;
+            padding: 6px 8px;
+            margin-top: 4px;
+            border-radius: 6px;
+            border: 1px solid #4b5563;
+            background: #020617;
+            color: #e5e7eb;
+        }
+        .center {
+            text-align: center;
+        }
+        .hidden {
+            display: none;
+        }
+
+        /* Landing buttons stacked */
+        .landing-buttons {
+            margin-top: 12px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 10px;
+        }
+        .landing-buttons button {
+            width: 70%;
+        }
+
+        .color-palette {
+            display: flex;
+            gap: 8px;
+            margin-top: 8px;
+            flex-wrap: wrap;
+        }
+        .color-swatch {
+            width: 28px;
+            height: 28px;
+            border-radius: 50%;
+            border: 2px solid transparent;
+            cursor: pointer;
+        }
+        .color-swatch.selected {
+            border-color: #facc15;
+            box-shadow: 0 0 0 2px rgba(250,204,21,0.6);
+        }
+        .game-id-box {
+            background: #0b1120;
+            border-radius: 8px;
+            padding: 10px 12px;
+            text-align: center;
+            border: 1px dashed #4b5563;
+            margin-top: 8px;
+        }
+        .pill {
+            display: inline-block;
+            padding: 4px 10px;
+            border-radius: 999px;
+            font-size: 0.8rem;
+        }
+        .pill-role {
+            background: #1d4ed8;
+            color: #dbeafe;
+        }
+        .pill-color {
+            background: #111827;
+            border: 1px solid #4b5563;
+        }
+        .lobby-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 14px;
+            margin-top: 16px;
+        }
+        .lobby-card {
+            background: #020617;
+            border-radius: 8px;
+            border: 1px solid #1f2937;
+            padding: 10px 12px;
+        }
+        .lobby-card h3 {
+            margin-top: 0;
+            font-size: 1rem;
+        }
+        .status-tag {
+            display: inline-block;
+            margin-top: 4px;
+            padding: 2px 8px;
+            border-radius: 999px;
+            font-size: 0.75rem;
+            border: 1px solid #4b5563;
+        }
+        .status-ok {
+            border-color: #22c55e;
+            color: #bbf7d0;
+        }
+        .status-wait {
+            border-color: #f97316;
+            color: #fed7aa;
+        }
+        #startError, #joinError, #errorMsg {
+            margin-top: 8px;
+            color: #fca5a5;
+            font-size: 0.85rem;
+        }
+
+        /* Game screen */
+        .game-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            font-size: 0.9rem;
+        }
+        .game-players {
+            margin-top: 10px;
+            border-radius: 8px;
+            border: 1px solid #1f2937;
+            padding: 8px 10px;
+            background: #020617;
+        }
+        .game-players-row {
+            display: flex;
+            justify-content: space-between;
+            font-size: 0.9rem;
+        }
+        .turn-indicator {
+            margin-top: 8px;
+            font-size: 0.9rem;
+        }
+        .turn-indicator span {
+            font-weight: 600;
+        }
+        .guess-input-row {
+            margin-top: 14px;
+            display: flex;
+            gap: 8px;
+        }
+        .guess-input-row input {
+            flex: 1;
+        }
+        .guess-history {
+            margin-top: 16px;
+            border-top: 1px solid #1f2937;
+            padding-top: 10px;
+            max-height: 260px;
+            overflow-y: auto;
+        }
+        .guess-row {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 6px;
+            font-family: monospace;
+            font-size: 0.95rem;
+        }
+        .tiles {
+            display: inline-flex;
+            gap: 4px;
+        }
+        .tile {
+            width: 24px;
+            height: 24px;
+            border-radius: 4px;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 0.8rem;
+            font-weight: 700;
+            color: #e5e7eb;
+        }
+        .tile-g {
+            background: #16a34a;
+        }
+        .tile-y {
+            background: #ca8a04;
+        }
+        .tile-n {
+            background: #4b5563;
+        }
+        .guess-status {
+            font-size: 0.75rem;
+            opacity: 0.8;
+        }
+        .game-footer {
+            margin-top: 10px;
+            font-size: 0.85rem;
+            text-align: center;
+        }
+        /* Wordle-style board */
+        .board {
+            margin-top: 16px;
+            display: grid;
+            row-gap: 8px;
+        }
+
+        .board-row {
+            display: grid;
+            grid-template-columns: repeat(6, 1fr); /* 6-letter words */
+            column-gap: 8px;
+            justify-items: center;
+        }
+
+        .board-tile {
+            width: 48px;
+            height: 48px;
+            border-radius: 4px;
+            border: 2px solid #4b5563;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.4rem;
+            font-weight: 700;
+            text-transform: uppercase;
+            background: #020617;
+            color: #e5e7eb;
+        }
+
+        .board-tile.filled {
+            border-color: #9ca3af;
+        }
+
+        /* Colors from backend pattern */
+        .tile-correct {           /* G */
+            background: #16a34a;
+            border-color: #16a34a;
+            color: #e5e7eb;
+        }
+        .tile-present {           /* Y */
+            background: #ca8a04;
+            border-color: #ca8a04;
+            color: #111827;
+        }
+        .tile-absent {            /* N */
+            background: #4b5563;
+            border-color: #4b5563;
+            color: #e5e7eb;
+        }
+
+        /* On-screen keyboard */
+        .keyboard {
+            margin-top: 18px;
+            display: flex;
+            flex-direction: column;
+            gap: 6px;
+            align-items: center;
+        }
+
+        .key-row {
+            display: flex;
+            gap: 6px;
+            justify-content: center;
+        }
+
+        .key {
+            min-width: 32px;
+            height: 44px;
+            border-radius: 4px;
+            border: none;
+            background: #4b5563;
+            color: #e5e7eb;
+            font-weight: 600;
+            cursor: pointer;
+            font-size: 0.9rem;
+            padding: 0 8px;
+        }
+
+        .key-large {
+            min-width: 54px;
+            font-size: 0.8rem;
+        }
+
+        /* Keyboard color states – same meaning as board */
+        .key-correct {
+            background: #16a34a;
+        }
+        .key-present {
+            background: #ca8a04;
+            color: #111827;
+        }
+        .key-absent {
+            background: #374151;
+        }
+
+    </style>
+</head>
+<body>
+<div class="container">
+    <h1>WORDLE DUEL</h1>
+
+    <!-- LANDING PAGE -->
+    <div id="landingSection" class="section">
+        <h2>Welcome</h2>
+        <p class="center">Choose an option to begin.</p>
+        <div class="center landing-buttons">
+            <button id="btnStartGame" class="btn-primary">Host Game</button>
+            <button id="btnJoinGame" class="btn-secondary">Join Game</button>
+        </div>
+    </div>
+
+    <!-- START GAME FORM -->
+    <div id="startFormSection" class="section hidden">
+        <h2>Host Game</h2>
+        <label>
+            Your Name:
+            <input type="text" id="startNameInput" placeholder="e.g. Tyler">
+        </label>
+
+        <label style="margin-top: 10px;">Choose Your Color:</label>
+        <div id="startColorPalette" class="color-palette"></div>
+
+        <div class="center" style="margin-top: 14px;">
+            <button id="btnStartConfirm" class="btn-primary">Create Lobby</button>
+            <button id="btnStartBack" class="btn-ghost" style="margin-left: 8px;">Back</button>
+        </div>
+        <div id="startError" class="center"></div>
+    </div>
+
+    <!-- JOIN GAME FORM -->
+    <div id="joinFormSection" class="section hidden">
+        <h2>Join Game</h2>
+        <label>
+            Your Name:
+            <input type="text" id="joinNameInput" placeholder="e.g. Seth">
+        </label>
+
+        <label style="margin-top: 10px;">Choose Your Color:</label>
+        <div id="joinColorPalette" class="color-palette"></div>
+
+        <label style="margin-top: 10px;">
+            Game ID:
+            <input type="text" id="joinGameIdInput" placeholder="e.g. ABC123">
+        </label>
+
+        <div class="center" style="margin-top: 14px;">
+            <button id="btnJoinConfirm" class="btn-secondary">Join Lobby</button>
+            <button id="btnJoinBack" class="btn-ghost" style="margin-left: 8px;">Back</button>
+        </div>
+        <div id="joinError" class="center"></div>
+    </div>
+
+    <!-- LOBBY SCREEN -->
+    <div id="lobbySection" class="section hidden">
+        <h2>Lobby</h2>
+        <div class="game-id-box">
+            <div>Game ID</div>
+            <div style="font-size: 1.4rem; font-weight: 700; letter-spacing: 3px;" id="lobbyGameId">–</div>
+            <div style="font-size: 0.8rem; margin-top: 4px;">Share this ID with your opponent</div>
+        </div>
+
+        <div class="lobby-grid">
+            <div class="lobby-card">
+                <h3>You</h3>
+                <p>Name: <strong id="lobbyPlayerName">–</strong></p>
+                <p>Role: <span class="pill pill-role" id="lobbyPlayerRole">–</span></p>
+                <p>
+                    Color:
+                    <span class="pill pill-color" id="lobbyPlayerColorLabel">–</span>
+                    <span id="lobbyPlayerColorPreview"
+                          style="display:inline-block;width:16px;height:16px;border-radius:50%;border:1px solid #4b5563;margin-left:6px;"></span>
+                </p>
+            </div>
+            <div class="lobby-card">
+                <h3>Opponent</h3>
+                <p>Name: <strong id="lobbyOpponentName">Waiting...</strong></p>
+                <p>Role: <span class="pill pill-role" id="lobbyOpponentRole">–</span></p>
+                <p>
+                    Status:
+                    <span id="lobbyOpponentStatus" class="status-tag status-wait">Waiting for opponent</span>
+                </p>
+            </div>
+        </div>
+
+        <div style="margin-top: 16px;">
+            <p><strong>Match status:</strong> <span id="lobbyMatchStatus">Not started</span></p>
+        </div>
+
+        <div class="center" style="margin-top: 16px;">
+            <button id="btnStartMatch" class="btn-primary btn-disabled">Start Match (host)</button>
+            <button id="btnLobbyBack" class="btn-ghost" style="margin-left: 8px;">Back to Landing (dev)</button>
+        </div>
+
+        <div id="errorMsg"></div>
+    </div>
+
+    <!-- GAME SCREEN -->
+<div id="gameSection" class="section hidden">
+    <h2>Wordle Duel</h2>
+
+    <div class="game-players">
+        <div class="game-players-row">
+            <span>You: <strong id="gamePlayerName">–</strong> (<span id="gamePlayerRole">–</span>)</span>
+            <span>Opponent: <strong id="gameOpponentName">–</strong> (<span id="gameOpponentRole">–</span>)</span>
+        </div>
+        <div class="turn-indicator">
+            Current turn: <span id="gameCurrentTurnLabel">–</span>
+        </div>
+    </div>
+
+    <!-- Wordle-style board -->
+    <div id="board" class="board"></div>
+
+    <!-- On-screen keyboard -->
+    <div class="keyboard" id="keyboard"></div>
+
+    <div id="gameError" style="margin-top: 8px; color: #fca5a5; font-size: 0.85rem;"></div>
+    <div class="game-footer">
+        <span id="gameFooterStatus">Game in progress...</span>
+    </div>
+</div>
+
+
+<script>
+    // Basic client-side state
+    let currentGameId = null;
+    let currentPlayerName = null;
+    let currentPlayerRole = null;  // "player1" or "player2"
+    let currentPlayerColor = null;
+
+    let opponentName = null;
+    let opponentRole = null;
+    let wordLength = 6; // default, will be updated from /start-game if needed
+
+    let lobbyPollInterval = null;
+
+    // Local list of guesses to render history
+    const guessHistory = [];
+
+    const COLORS = [
+        { name: 'Red', value: '#ef4444' },
+        { name: 'Green', value: '#22c55e' },
+        { name: 'Blue', value: '#3b82f6' },
+        { name: 'Yellow', value: '#facc15' },
+        { name: 'Purple', value: '#a855f7' },
+        { name: 'Teal', value: '#14b8a6' }
+    ];
+
+    // Sections
+    const landingSection = document.getElementById('landingSection');
+    const startFormSection = document.getElementById('startFormSection');
+    const joinFormSection = document.getElementById('joinFormSection');
+    const lobbySection = document.getElementById('lobbySection');
+    const gameSection = document.getElementById('gameSection');
+
+    function showSection(section) {
+        landingSection.classList.add('hidden');
+        startFormSection.classList.add('hidden');
+        joinFormSection.classList.add('hidden');
+        lobbySection.classList.add('hidden');
+        gameSection.classList.add('hidden');
+
+        section.classList.remove('hidden');
+
+        if (section !== lobbySection && lobbyPollInterval) {
+            clearInterval(lobbyPollInterval);
+            lobbyPollInterval = null;
+        }
+    }
+
+    // ----- Color palettes -----
+    function buildPalette(containerId, onSelect) {
+        const container = document.getElementById(containerId);
+        container.innerHTML = '';
+        COLORS.forEach(color => {
+            const swatch = document.createElement('div');
+            swatch.className = 'color-swatch';
+            swatch.style.backgroundColor = color.value;
+            swatch.title = color.name;
+            swatch.dataset.colorName = color.name;
+            swatch.dataset.colorValue = color.value;
+            swatch.addEventListener('click', () => {
+                container.querySelectorAll('.color-swatch').forEach(el => el.classList.remove('selected'));
+                swatch.classList.add('selected');
+                onSelect(color);
+            });
+            container.appendChild(swatch);
+        });
+    }
+
+    let selectedStartColor = null;
+    buildPalette('startColorPalette', (color) => {
+        selectedStartColor = color;
+    });
+
+    let selectedJoinColor = null;
+    buildPalette('joinColorPalette', (color) => {
+        selectedJoinColor = color;
+    });
+
+    // ----- Landing buttons -----
+    document.getElementById('btnStartGame').addEventListener('click', () => {
+        document.getElementById('startError').textContent = '';
+        showSection(startFormSection);
+    });
+
+    document.getElementById('btnJoinGame').addEventListener('click', () => {
+        document.getElementById('joinError').textContent = '';
+        showSection(joinFormSection);
+    });
+
+    // Back buttons
+    document.getElementById('btnStartBack').addEventListener('click', () => {
+        showSection(landingSection);
+    });
+    document.getElementById('btnJoinBack').addEventListener('click', () => {
+        showSection(landingSection);
+    });
+    document.getElementById('btnLobbyBack').addEventListener('click', () => {
+        showSection(landingSection);
+    });
+
+    // ----- Host Game Confirm -----
+    document.getElementById('btnStartConfirm').addEventListener('click', async () => {
+        const name = document.getElementById('startNameInput').value.trim();
+        const errorEl = document.getElementById('startError');
+        errorEl.textContent = '';
+
+        if (!name) {
+            errorEl.textContent = 'Please enter your name.';
+            return;
+        }
+        if (!selectedStartColor) {
+            errorEl.textContent = 'Please choose a color.';
+            return;
+        }
+
+        try {
+            const res = await fetch('/start-game');
+            const data = await res.json();
+
+            currentGameId = data.gameID;
+            wordLength = data.wordLength || 6;
+            currentPlayerName = name;
+            currentPlayerColor = selectedStartColor;
+
+            const joinRes = await fetch(`/join-game?gameID=${encodeURIComponent(currentGameId)}&playerName=${encodeURIComponent(currentPlayerName)}`);
+            const joinData = await joinRes.json();
+
+            if (joinData.status !== 'JOINED') {
+                errorEl.textContent = 'Failed to join created game: ' + (joinData.message || '');
+                return;
+            }
+
+            currentPlayerRole = joinData.role; // "player1"
+
+            populateLobby();
+            showSection(lobbySection);
+            startLobbyPolling();
+
+        } catch (err) {
+            errorEl.textContent = 'Error communicating with server.';
+            console.error(err);
+        }
+    });
+
+    // ----- Join Game Confirm -----
+    document.getElementById('btnJoinConfirm').addEventListener('click', async () => {
+        const name = document.getElementById('joinNameInput').value.trim();
+        const gameID = document.getElementById('joinGameIdInput').value.trim().toUpperCase();
+        const errorEl = document.getElementById('joinError');
+        errorEl.textContent = '';
+
+        if (!name) {
+            errorEl.textContent = 'Please enter your name.';
+            return;
+        }
+        if (!selectedJoinColor) {
+            errorEl.textContent = 'Please choose a color.';
+            return;
+        }
+        if (!gameID) {
+            errorEl.textContent = 'Please enter a game ID.';
+            return;
+        }
+
+        try {
+            const res = await fetch(`/join-game?gameID=${encodeURIComponent(gameID)}&playerName=${encodeURIComponent(name)}`);
+            const data = await res.json();
+
+            if (data.status !== 'JOINED') {
+                errorEl.textContent = data.message || 'Failed to join game.';
+                return;
+            }
+
+            currentGameId = gameID;
+            currentPlayerName = name;
+            currentPlayerRole = data.role; // "player1" or "player2"
+            currentPlayerColor = selectedJoinColor;
+
+            populateLobby();
+            showSection(lobbySection);
+            startLobbyPolling();
+
+        } catch (err) {
+            errorEl.textContent = 'Error communicating with server.';
+            console.error(err);
+        }
+    });
+
+    // ----- Start Match (host) -----
+    const btnStartMatch = document.getElementById('btnStartMatch');
+    btnStartMatch.addEventListener('click', async () => {
+        if (btnStartMatch.classList.contains('btn-disabled')) {
+            return;
+        }
+        if (!currentGameId || !currentPlayerName) return;
+
+        try {
+            const res = await fetch(`/start-match?gameID=${encodeURIComponent(currentGameId)}&playerName=${encodeURIComponent(currentPlayerName)}`);
+            const data = await res.json();
+
+            if (data.status === 'OK') {
+                document.getElementById('lobbyMatchStatus').textContent = 'Match started.';
+                btnStartMatch.classList.add('btn-disabled');
+                // The lobby polling will detect gameStarted and move to game screen for both players
+            } else {
+                document.getElementById('errorMsg').textContent = data.message || 'Cannot start match.';
+            }
+        } catch (err) {
+            document.getElementById('errorMsg').textContent = 'Error calling start-match.';
+            console.error(err);
+        }
+    });
+
+    function populateLobby() {
+        document.getElementById('lobbyGameId').textContent = currentGameId || '–';
+        document.getElementById('lobbyPlayerName').textContent = currentPlayerName || '–';
+        document.getElementById('lobbyPlayerRole').textContent = currentPlayerRole || '–';
+
+        const colorLabel = document.getElementById('lobbyPlayerColorLabel');
+        const colorPreview = document.getElementById('lobbyPlayerColorPreview');
+
+        if (currentPlayerColor) {
+            colorLabel.textContent = currentPlayerColor.name;
+            colorPreview.style.backgroundColor = currentPlayerColor.value;
+        } else {
+            colorLabel.textContent = '–';
+            colorPreview.style.backgroundColor = 'transparent';
+        }
+    }
+
+    function startLobbyPolling() {
+        if (lobbyPollInterval) {
+            clearInterval(lobbyPollInterval);
+        }
+        lobbyPollInterval = setInterval(fetchGameState, 2000);
+        fetchGameState();
+    }
+
+    async function fetchGameState() {
+        if (!currentGameId) return;
+
+        try {
+            const res = await fetch(`/game-state?gameID=${encodeURIComponent(currentGameId)}`);
+            const data = await res.json();
+
+            // Opponent info
+            opponentName = null;
+            opponentRole = null;
+            let opponentJoined = false;
+
+            if (currentPlayerRole === 'player1') {
+                if (data.player2Name) {
+                    opponentName = data.player2Name;
+                    opponentRole = 'player2';
+                    opponentJoined = true;
+                }
+            } else if (currentPlayerRole === 'player2') {
+                if (data.player1Name) {
+                    opponentName = data.player1Name;
+                    opponentRole = 'player1';
+                    opponentJoined = true;
+                }
+            }
+
+            document.getElementById('lobbyOpponentName').textContent = opponentName || 'Waiting...';
+            document.getElementById('lobbyOpponentRole').textContent = opponentRole || '–';
+
+            const oppStatus = document.getElementById('lobbyOpponentStatus');
+            if (opponentJoined) {
+                oppStatus.textContent = 'Opponent connected';
+                oppStatus.classList.remove('status-wait');
+                oppStatus.classList.add('status-ok');
+            } else {
+                oppStatus.textContent = 'Waiting for opponent';
+                oppStatus.classList.remove('status-ok');
+                oppStatus.classList.add('status-wait');
+            }
+
+            // Match status
+            const matchStatusEl = document.getElementById('lobbyMatchStatus');
+            if (data.gameStarted) {
+                matchStatusEl.textContent = 'Match started.';
+            } else {
+                matchStatusEl.textContent = 'Not started';
+            }
+
+            // Enable Start Match only if host, opponent joined, not started
+            if (currentPlayerRole === 'player1' && opponentJoined && !data.gameStarted) {
+                btnStartMatch.classList.remove('btn-disabled');
+            } else {
+                btnStartMatch.classList.add('btn-disabled');
+            }
+
+            // If game has started, move both players to game screen
+            if (data.gameStarted) {
+                enterGameScreen(data);
+            }
+
+        } catch (err) {
+            console.error('Error fetching game state:', err);
+        }
+    }
+
+    function enterGameScreen(latestState) {
+        // Prepare game UI
+        document.getElementById('gameGameId').textContent = currentGameId || '–';
+        document.getElementById('gameWordLength').textContent = wordLength;
+
+        document.getElementById('gamePlayerName').textContent = currentPlayerName || '–';
+        document.getElementById('gamePlayerRole').textContent = currentPlayerRole || '–';
+        document.getElementById('gameOpponentName').textContent = opponentName || '–';
+        document.getElementById('gameOpponentRole').textContent = opponentRole || '–';
+
+        document.getElementById('gameCurrentTurnLabel').textContent =
+            latestState.currentTurn ? latestState.currentTurn : '–';
+
+        document.getElementById('gameError').textContent = '';
+        document.getElementById('gameFooterStatus').textContent = 'Game in progress...';
+
+        // Clear guess history (new match)
+        guessHistory.length = 0;
+        renderGuessHistory();
+
+        showSection(gameSection);
+    }
+
+    // ----- Guess submission -----
+    const btnSubmitGuess = document.getElementById('btnSubmitGuess');
+    const guessInput = document.getElementById('guessInput');
+
+    btnSubmitGuess.addEventListener('click', submitGuess);
+    guessInput.addEventListener('keydown', (e) => {
+        if (e.key === 'Enter') {
+            submitGuess();
+        }
+    });
+
+    async function submitGuess() {
+        const gameError = document.getElementById('gameError');
+        gameError.textContent = '';
+        if (!currentGameId || !currentPlayerName) {
+            gameError.textContent = 'You are not in a game.';
+            return;
+        }
+
+        const guess = guessInput.value.trim().toUpperCase();
+        if (guess.length !== wordLength) {
+            gameError.textContent = `Guess must be exactly ${wordLength} letters.`;
+            return;
+        }
+
+        try {
+            const url = `/play-guess?gameID=${encodeURIComponent(currentGameId)}&playerName=${encodeURIComponent(currentPlayerName)}&guess=${encodeURIComponent(guess)}`;
+            const res = await fetch(url);
+            const data = await res.json();
+
+            handleGuessResponse(guess, data);
+        } catch (err) {
+            console.error('Error calling /play-guess:', err);
+            gameError.textContent = 'Error communicating with server.';
+        }
+    }
+
+    function handleGuessResponse(guess, data) {
+        const gameError = document.getElementById('gameError');
+
+        const status = data.status || 'UNKNOWN';
+        const pattern = data.pattern || '------';
+        const message = data.message || '';
+
+        // Append to local history
+        guessHistory.push({
+            guess,
+            pattern,
+            status
+        });
+        renderGuessHistory();
+
+        // Update turn label if present
+        if (data.nextTurn) {
+            document.getElementById('gameCurrentTurnLabel').textContent = data.nextTurn;
+        }
+
+        // Handle statuses
+        if (status === 'INVALID') {
+            gameError.textContent = message || 'Invalid word.';
+        } else if (status === 'NOT_YOUR_TURN') {
+            gameError.textContent = message || 'Not your turn.';
+        } else if (status === 'WIN') {
+            const winner = data.winner || currentPlayerName;
+            document.getElementById('gameFooterStatus').textContent =
+                `Game over! Winner: ${winner}`;
+            gameError.textContent = '';
+        } else if (status === 'OK') {
+            gameError.textContent = '';
+        } else {
+            // Fallback
+            gameError.textContent = message || `Status: ${status}`;
+        }
+    }
+
+    function renderGuessHistory() {
+        const container = document.getElementById('guessHistory');
+        container.innerHTML = '';
+
+        guessHistory.forEach(entry => {
+            const row = document.createElement('div');
+            row.className = 'guess-row';
+
+            const left = document.createElement('div');
+            left.textContent = entry.guess;
+
+            const right = document.createElement('div');
+
+            const tiles = document.createElement('div');
+            tiles.className = 'tiles';
+
+            const pattern = entry.pattern || '';
+            for (let i = 0; i < pattern.length; i++) {
+                const ch = pattern[i];
+                const tile = document.createElement('div');
+                tile.classList.add('tile');
+                if (ch === 'G') tile.classList.add('tile-g');
+                else if (ch === 'Y') tile.classList.add('tile-y');
+                else tile.classList.add('tile-n');
+
+                tile.textContent = ch;
+                tiles.appendChild(tile);
+            }
+
+            const status = document.createElement('div');
+            status.className = 'guess-status';
+            status.textContent = entry.status;
+
+            right.appendChild(tiles);
+            right.appendChild(status);
+
+            row.appendChild(left);
+            row.appendChild(right);
+            container.appendChild(row);
+        });
+    }
+</script>
+</body>
+</html>
