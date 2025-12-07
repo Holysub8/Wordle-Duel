@@ -3,7 +3,8 @@ FROM eclipse-temurin:17-jdk
 WORKDIR /app
 COPY . .
 
-RUN ./mvnw -DskipTests package
+# make mvnw executable, then build
+RUN chmod +x mvnw && ./mvnw -DskipTests package
 
 EXPOSE 8080
 
