@@ -89,7 +89,7 @@
             gap: 10px;
         }
         .landing-buttons button {
-            width: 70%;
+            width: 40%;
         }
 
         .color-palette {
@@ -253,36 +253,60 @@
         }
         /* Wordle-style board */
         .board {
-            margin-top: 16px;
-            display: grid;
-            row-gap: 8px;
+        margin-top: 16px;
+        display: grid;
+        row-gap: 6px;        /* slightly smaller vertical gap */
+        max-height: 360px;   /* or whatever fits your layout */
+        overflow-y: auto;    /* scroll when there are many guesses */
         }
 
-        .board-row {
-            display: grid;
-            grid-template-columns: repeat(6, 1fr); /* 6-letter words */
-            column-gap: 8px;
-            justify-items: center;
+        .board-row{
+            display:flex;
+            justify-content:center;   /* center whole row */
+            align-items:center;
+            gap:8px;
+        }       
+
+        .board-row-tiles {
+            display: flex;
+            gap: 4px;  /* horizontal spacing between boxes (smaller) */
         }
+
 
         .board-tile {
-            width: 48px;
-            height: 48px;
-            border-radius: 4px;
-            border: 2px solid #4b5563;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-size: 1.4rem;
-            font-weight: 700;
-            text-transform: uppercase;
-            background: #020617;
-            color: #e5e7eb;
+        width: 52px;          /* was 48px */
+        height: 52px;         /* was 48px */
+        border-radius: 4px;
+        border: 2px solid #4b5563;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 1.2rem;    /* slightly smaller text */
+        font-weight: 700;
+        text-transform: uppercase;
+        background: #020617;
+        color: #e5e7eb;
         }
 
         .board-tile.filled {
             border-color: #9ca3af;
         }
+
+        .guess-bubble {
+            width: 24px;
+            height: 24px;
+            border-radius: 50%;
+            border: 2px solid #1f2937;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 0.75rem;
+            font-weight: 700;
+            color: #0f172a;     /* text on top of colored bubble */
+            background: #4b5563; /* default if no color resolved */
+            flex-shrink: 0;
+        }
+
 
         /* Colors from backend pattern */
         .tile-correct {           /* G */
@@ -343,7 +367,9 @@
             color: #111827;
         }
         .key-absent {
-            background: #374151;
+            background: #020617;
+             color: #9ca3af;
+              border: 1px solid #000000;
         }
 
     </style>
@@ -359,6 +385,7 @@
         <div class="center landing-buttons">
             <button id="btnStartGame" class="btn-primary">Host Game</button>
             <button id="btnJoinGame" class="btn-secondary">Join Game</button>
+            <button id="btnHowTo" class="btn-ghost">How To Play</button>
         </div>
     </div>
 
@@ -447,15 +474,86 @@
         <div id="errorMsg"></div>
     </div>
 
+    <!-- HOW TO PLAY SCREEN -->
+<div id="howToSection" class="section hidden">
+    <h2>How To Play</h2>
+
+    <h3>Goal</h3>
+    <p>
+        Guess the secret word before your opponent does. You take turns guessing the same word,
+        and both players see the same board and history.
+    </p>
+
+    <h3>Setup</h3>
+    <ol>
+        <li><strong>Host Game:</strong> One player clicks “Host Game”, enters a name, and gets a Game ID.</li>
+        <li><strong>Share ID:</strong> The host sends the Game ID to the opponent.</li>
+        <li><strong>Join Game:</strong> The opponent clicks “Join Game”, enters their name and the Game ID.</li>
+        <li><strong>Start Match:</strong> Once both players are connected, the host clicks “Start Match”.</li>
+    </ol>
+
+    <h3>Taking Turns</h3>
+    <ul>
+        <li>Players alternate turns making one guess at a time.</li>
+        <li>The “Current turn” label shows whose turn it is (by name).</li>
+        <li>Both players see every guess on the shared board in the order they were made.</li>
+    </ul>
+
+    <h3>Tile Colors</h3>
+    <ul>
+        <li><span style="display:inline-block;width:14px;height:14px;border-radius:3px;background:#16a34a;margin-right:6px;"></span>
+            <strong>Green:</strong> Correct letter in the correct position.</li>
+        <li><span style="display:inline-block;width:14px;height:14px;border-radius:3px;background:#ca8a04;margin-right:6px;"></span>
+            <strong>Yellow:</strong> Letter is in the word, but in a different position.</li>
+        <li><span style="display:inline-block;width:14px;height:14px;border-radius:3px;background:#4b5563;margin-right:6px;"></span>
+            <strong>Gray:</strong> Letter is not in the word.</li>
+    </ul>
+
+    <h3>Keyboard</h3>
+    <p>
+        Use the on-screen keyboard or your physical keyboard to type guesses.
+        The keyboard keys are colored using the best information you’ve discovered so far
+        (green &gt; yellow &gt; gray).
+    </p>
+
+    <h3>Invalid Words</h3>
+    <p>
+        If you enter a word that is not in the dictionary, you’ll see an error message and your
+        tiles will not update. You can correct the word and try again.
+    </p>
+
+    <h3>Winning, Rematching, Exiting</h3>
+    <ul>
+        <li>The first player to guess the secret word wins.</li>
+        <li>After the game ends, you can choose <strong>Rematch</strong> to start a new game with a new word.</li>
+        <li>Choose <strong>Exit</strong> to return to the main menu.</li>
+    </ul>
+
+    <!-- OPTIONAL: screenshots – replace src with your actual files -->
+    <!--
+    <h3>Examples</h3>
+    <p>Example game board:</p>
+    <img src="img/board-example.png" alt="Example board" class="howto-img">
+
+    <p>Example lobby screen:</p>
+    <img src="img/lobby-example.png" alt="Lobby example" class="howto-img">
+    -->
+
+    <div class="center" style="margin-top: 16px;">
+        <button id="btnHowToBack" class="btn-ghost">Back</button>
+    </div>
+</div>
+
     <!-- GAME SCREEN -->
 <div id="gameSection" class="section hidden">
     <h2>Wordle Duel</h2>
 
     <div class="game-players">
         <div class="game-players-row">
-            <span>You: <strong id="gamePlayerName">–</strong> (<span id="gamePlayerRole">–</span>)</span>
-            <span>Opponent: <strong id="gameOpponentName">–</strong> (<span id="gameOpponentRole">–</span>)</span>
+            <span>You: <strong id="gamePlayerName">–</strong></span>
+            <span>Opponent: <strong id="gameOpponentName">–</strong></span>
         </div>
+
         <div class="turn-indicator">
             Current turn: <span id="gameCurrentTurnLabel">–</span>
         </div>
@@ -471,6 +569,10 @@
     <div class="game-footer">
         <span id="gameFooterStatus">Game in progress...</span>
     </div>
+    <div id="gameEndActions" class="center hidden" style="margin-top: 8px;">
+        <button id="btnRematch" class="btn-primary">Rematch</button>
+        <button id="btnExit" class="btn-ghost" style="margin-left: 8px;">Exit</button>
+    </div>
 </div>
 
 
@@ -485,10 +587,20 @@
     let opponentRole = null;
     let wordLength = 6; // default, will be updated from /start-game if needed
 
-    let lobbyPollInterval = null;
+    const maxRows = 50;          // number of guesses (rows)
+    let boardState = [];        // [{letters: [...], pattern: [...]}]
+    let currentRow = 0;
+    let currentCol = 0;
 
-    // Local list of guesses to render history
-    const guessHistory = [];
+    // Keyboard colors: 'correct', 'present', 'absent'
+    const keyboardState = {};   // key -> 'correct' | 'present' | 'absent'
+
+    let lobbyPollInterval = null;
+    let historyPollInterval = null;
+    let keyboardListenerAttached = false;
+    let inGame = false; // to avoid re-entering game screen repeatedly
+    let lastSyncedGuessCount = 0;
+
 
     const COLORS = [
         { name: 'Red', value: '#ef4444' },
@@ -505,21 +617,41 @@
     const joinFormSection = document.getElementById('joinFormSection');
     const lobbySection = document.getElementById('lobbySection');
     const gameSection = document.getElementById('gameSection');
+    const howToSection = document.getElementById('howToSection');
+
+    function resolveTurnLabel(turnToken) {
+    if (!turnToken) return '–';
+
+    if (turnToken === 'player1') {
+        // if you are player1, use your name, otherwise opponent
+        return (currentPlayerRole === 'player1' ? currentPlayerName : opponentName) || '–';
+    }
+    if (turnToken === 'player2') {
+        return (currentPlayerRole === 'player2' ? currentPlayerName : opponentName) || '–';
+    }
+
+    // fallback if some other token appears
+    return turnToken;
+}
+
 
     function showSection(section) {
-        landingSection.classList.add('hidden');
-        startFormSection.classList.add('hidden');
-        joinFormSection.classList.add('hidden');
-        lobbySection.classList.add('hidden');
-        gameSection.classList.add('hidden');
+    landingSection.classList.add('hidden');
+    startFormSection.classList.add('hidden');
+    joinFormSection.classList.add('hidden');
+    lobbySection.classList.add('hidden');
+    gameSection.classList.add('hidden');
+    howToSection.classList.add('hidden'); 
 
-        section.classList.remove('hidden');
+    section.classList.remove('hidden');
 
-        if (section !== lobbySection && lobbyPollInterval) {
-            clearInterval(lobbyPollInterval);
-            lobbyPollInterval = null;
-        }
+    // Only stop polling when we go back to the landing screen
+    if (section === landingSection && lobbyPollInterval) {
+        clearInterval(lobbyPollInterval);
+        lobbyPollInterval = null;
     }
+}
+
 
     // ----- Color palettes -----
     function buildPalette(containerId, onSelect) {
@@ -560,6 +692,11 @@
     document.getElementById('btnJoinGame').addEventListener('click', () => {
         document.getElementById('joinError').textContent = '';
         showSection(joinFormSection);
+    });
+
+    // NEW: How To Play button from landing
+    document.getElementById('btnHowTo').addEventListener('click', () => {
+    showSection(howToSection);
     });
 
     // Back buttons
@@ -711,124 +848,324 @@
         fetchGameState();
     }
 
-    async function fetchGameState() {
-        if (!currentGameId) return;
-
-        try {
-            const res = await fetch(`/game-state?gameID=${encodeURIComponent(currentGameId)}`);
-            const data = await res.json();
-
-            // Opponent info
-            opponentName = null;
-            opponentRole = null;
-            let opponentJoined = false;
-
-            if (currentPlayerRole === 'player1') {
-                if (data.player2Name) {
-                    opponentName = data.player2Name;
-                    opponentRole = 'player2';
-                    opponentJoined = true;
-                }
-            } else if (currentPlayerRole === 'player2') {
-                if (data.player1Name) {
-                    opponentName = data.player1Name;
-                    opponentRole = 'player1';
-                    opponentJoined = true;
-                }
-            }
-
-            document.getElementById('lobbyOpponentName').textContent = opponentName || 'Waiting...';
-            document.getElementById('lobbyOpponentRole').textContent = opponentRole || '–';
-
-            const oppStatus = document.getElementById('lobbyOpponentStatus');
-            if (opponentJoined) {
-                oppStatus.textContent = 'Opponent connected';
-                oppStatus.classList.remove('status-wait');
-                oppStatus.classList.add('status-ok');
-            } else {
-                oppStatus.textContent = 'Waiting for opponent';
-                oppStatus.classList.remove('status-ok');
-                oppStatus.classList.add('status-wait');
-            }
-
-            // Match status
-            const matchStatusEl = document.getElementById('lobbyMatchStatus');
-            if (data.gameStarted) {
-                matchStatusEl.textContent = 'Match started.';
-            } else {
-                matchStatusEl.textContent = 'Not started';
-            }
-
-            // Enable Start Match only if host, opponent joined, not started
-            if (currentPlayerRole === 'player1' && opponentJoined && !data.gameStarted) {
-                btnStartMatch.classList.remove('btn-disabled');
-            } else {
-                btnStartMatch.classList.add('btn-disabled');
-            }
-
-            // If game has started, move both players to game screen
-            if (data.gameStarted) {
-                enterGameScreen(data);
-            }
-
-        } catch (err) {
-            console.error('Error fetching game state:', err);
-        }
+    function showEndActions() {
+    const el = document.getElementById('gameEndActions');
+    if (el) el.classList.remove('hidden');
     }
 
+    function hideEndActions() {
+    const el = document.getElementById('gameEndActions');
+    if (el) el.classList.add('hidden');
+    }
+
+
+    async function fetchGameState() {
+    if (!currentGameId) return;
+
+    try {
+        const res = await fetch(`/game-state?gameID=${encodeURIComponent(currentGameId)}`);
+        const data = await res.json();
+
+        // Opponent info
+        opponentName = null;
+        opponentRole = null;
+        let opponentJoined = false;
+
+        if (currentPlayerRole === 'player1') {
+            if (data.player2Name) {
+                opponentName = data.player2Name;
+                opponentRole = 'player2';
+                opponentJoined = true;
+            }
+        } else if (currentPlayerRole === 'player2') {
+            if (data.player1Name) {
+                opponentName = data.player1Name;
+                opponentRole = 'player1';
+                opponentJoined = true;
+            }
+        }
+
+        document.getElementById('lobbyOpponentName').textContent = opponentName || 'Waiting...';
+        document.getElementById('lobbyOpponentRole').textContent = opponentRole || '–';
+
+        const oppStatus = document.getElementById('lobbyOpponentStatus');
+        if (opponentJoined) {
+            oppStatus.textContent = 'Opponent connected';
+            oppStatus.classList.remove('status-wait');
+            oppStatus.classList.add('status-ok');
+        } else {
+            oppStatus.textContent = 'Waiting for opponent';
+            oppStatus.classList.remove('status-ok');
+            oppStatus.classList.add('status-wait');
+        }
+
+        // Match status in lobby
+        const matchStatusEl = document.getElementById('lobbyMatchStatus');
+        if (data.gameStarted) {
+            matchStatusEl.textContent = 'Match started.';
+        } else {
+            matchStatusEl.textContent = 'Not started';
+        }
+
+        // Enable Start Match only if host, opponent joined, not started
+        if (currentPlayerRole === 'player1' && opponentJoined && !data.gameStarted) {
+            btnStartMatch.classList.remove('btn-disabled');
+        } else {
+            btnStartMatch.classList.add('btn-disabled');
+        }
+
+        // If game has started, move to game screen (only once)
+        if (data.gameStarted && !inGame) {
+            inGame = true;
+            enterGameScreen(data);
+        }
+
+        // While in game, keep "Current turn" label accurate from server
+        if (inGame && data.currentTurn) {
+            document.getElementById('gameCurrentTurnLabel').textContent =
+                resolveTurnLabel(data.currentTurn);
+        }
+
+        // If game is over, update footer + clear current turn for everyone
+        if (inGame && data.gameOver) {
+            const footer = document.getElementById('gameFooterStatus');
+            const turnLabel = document.getElementById('gameCurrentTurnLabel');
+            const winnerName = data.winner || '–';
+
+            footer.textContent = `Game over! Winner: ${winnerName}`;
+            turnLabel.textContent = '—';
+            showEndActions();
+        }
+
+    } catch (err) {
+        console.error('Error fetching game state:', err);
+    }
+}
+
+
+
     function enterGameScreen(latestState) {
-        // Prepare game UI
-        document.getElementById('gameGameId').textContent = currentGameId || '–';
-        document.getElementById('gameWordLength').textContent = wordLength;
+        inGame = true;
 
         document.getElementById('gamePlayerName').textContent = currentPlayerName || '–';
-        document.getElementById('gamePlayerRole').textContent = currentPlayerRole || '–';
         document.getElementById('gameOpponentName').textContent = opponentName || '–';
-        document.getElementById('gameOpponentRole').textContent = opponentRole || '–';
 
         document.getElementById('gameCurrentTurnLabel').textContent =
-            latestState.currentTurn ? latestState.currentTurn : '–';
+        resolveTurnLabel(latestState.currentTurn);
+
 
         document.getElementById('gameError').textContent = '';
         document.getElementById('gameFooterStatus').textContent = 'Game in progress...';
+        hideEndActions();
 
-        // Clear guess history (new match)
-        guessHistory.length = 0;
-        renderGuessHistory();
+
+        initBoard();
+        initKeyboard();
 
         showSection(gameSection);
+
+        // start polling shared history so both players see the same board
+        startHistoryPolling();
     }
 
-    // ----- Guess submission -----
-    const btnSubmitGuess = document.getElementById('btnSubmitGuess');
-    const guessInput = document.getElementById('guessInput');
+    function startHistoryPolling() {
+        if (historyPollInterval) clearInterval(historyPollInterval);
+        fetchGuessHistory(); // initial
+        historyPollInterval = setInterval(fetchGuessHistory, 1500);
+    }
 
-    btnSubmitGuess.addEventListener('click', submitGuess);
-    guessInput.addEventListener('keydown', (e) => {
-        if (e.key === 'Enter') {
-            submitGuess();
+    function initBoard() {
+    boardState = [];
+    currentRow = 0;
+    currentCol = 0;
+
+    const board = document.getElementById('board');
+    board.innerHTML = '';
+
+    appendNewBoardRow(); // just one to start
+    }
+
+    function appendNewBoardRow() {
+    const r = boardState.length;
+
+    const rowLetters = new Array(wordLength).fill('');
+    const rowPattern = new Array(wordLength).fill(null);
+
+    boardState.push({ letters: rowLetters, pattern: rowPattern });
+
+    const board = document.getElementById('board');
+
+    // Outer wrapper: bubble + tiles
+    const rowWrapper = document.createElement('div');
+    rowWrapper.className = 'board-row';
+
+    // Bubble for player color
+    const bubble = document.createElement('div');
+    bubble.className = 'guess-bubble';
+    bubble.dataset.row = r;
+    rowWrapper.appendChild(bubble);
+
+    // Tiles container
+    const tilesContainer = document.createElement('div');
+    tilesContainer.className = 'board-row-tiles';
+
+    for (let c = 0; c < wordLength; c++) {
+        const tile = document.createElement('div');
+        tile.className = 'board-tile';
+        tile.dataset.row = r;
+        tile.dataset.col = c;
+        tilesContainer.appendChild(tile);
+    }
+
+    rowWrapper.appendChild(tilesContainer);
+    board.appendChild(rowWrapper);
+    }
+
+    function getColorForPlayerName(playerName) {
+    if (!playerName) return '#4b5563'; // default
+
+    // your own guesses use your chosen color
+    if (playerName === currentPlayerName && currentPlayerColor) {
+        return currentPlayerColor.value;
+    }
+
+    // opponent guesses: neutral gray (since we don't know their color here)
+    return '#4b5563';
+    }
+
+    function setRowBubble(rowIndex, playerName) {
+    const bubble = document.querySelector(`.guess-bubble[data-row="${rowIndex}"]`);
+    if (!bubble) return;
+
+    // Show first letter of the player's name
+    bubble.textContent = playerName ? playerName.charAt(0).toUpperCase() : '?';
+
+    const color = getColorForPlayerName(playerName);
+    bubble.style.backgroundColor = color;
+    }
+
+
+
+
+
+    function initKeyboard() {
+        const keyboard = document.getElementById('keyboard');
+        keyboard.innerHTML = '';
+        Object.keys(keyboardState).forEach(k => delete keyboardState[k]);
+
+        const rows = [
+            ["Q","W","E","R","T","Y","U","I","O","P"],
+            ["A","S","D","F","G","H","J","K","L"],
+            ["ENTER","Z","X","C","V","B","N","M","BACKSPACE"]
+        ];
+
+        rows.forEach(row => {
+            const rowDiv = document.createElement('div');
+            rowDiv.className = 'key-row';
+
+            row.forEach(keyValue => {
+                const btn = document.createElement('button');
+                btn.className = 'key';
+
+                if (keyValue === 'ENTER' || keyValue === 'BACKSPACE') {
+                    btn.classList.add('key-large');
+                }
+
+                btn.textContent = (keyValue === 'BACKSPACE') ? '⌫' : keyValue;
+                btn.dataset.key = keyValue;
+                btn.addEventListener('click', () => handleKeyPress(keyValue));
+                rowDiv.appendChild(btn);
+            });
+
+            keyboard.appendChild(rowDiv);
+        });
+
+        // physical keyboard support (attach only once)
+        if (!keyboardListenerAttached) {
+            document.addEventListener('keydown', handlePhysicalKey);
+            keyboardListenerAttached = true;
         }
-    });
+    }
 
-    async function submitGuess() {
+    function handlePhysicalKey(e) {
+        if (!gameSection || gameSection.classList.contains('hidden')) return;
+
+        const key = e.key;
+        if (key === 'Enter') {
+            handleKeyPress('ENTER');
+        } else if (key === 'Backspace') {
+            handleKeyPress('BACKSPACE');
+        } else if (/^[a-zA-Z]$/.test(key)) {
+            handleKeyPress(key.toUpperCase());
+        }
+    }
+
+    function handleKeyPress(key) {
+        if (key === 'ENTER') {
+            submitGuessFromBoard();
+            return;
+        }
+        if (key === 'BACKSPACE') {
+            deleteLetter();
+            return;
+        }
+        if (/^[A-Z]$/.test(key)) {
+            addLetter(key);
+        }
+    }
+
+    function addLetter(letter) {
+        if (currentRow >= maxRows) return;
+        if (currentCol >= wordLength) return;
+
+        const row = boardState[currentRow];
+        row.letters[currentCol] = letter;
+
+        const tile = getTile(currentRow, currentCol);
+        tile.textContent = letter;
+        tile.classList.add('filled');
+
+        currentCol++;
+    }
+
+    function deleteLetter() {
+        if (currentCol === 0) return;
+
+        currentCol--;
+        const row = boardState[currentRow];
+        row.letters[currentCol] = '';
+
+        const tile = getTile(currentRow, currentCol);
+        tile.textContent = '';
+        tile.classList.remove('filled', 'tile-correct', 'tile-present', 'tile-absent');
+    }
+
+    function getTile(r, c) {
+        return document.querySelector(`.board-tile[data-row="${r}"][data-col="${c}"]`);
+    }
+
+    async function submitGuessFromBoard() {
         const gameError = document.getElementById('gameError');
         gameError.textContent = '';
+
         if (!currentGameId || !currentPlayerName) {
             gameError.textContent = 'You are not in a game.';
             return;
         }
 
-        const guess = guessInput.value.trim().toUpperCase();
-        if (guess.length !== wordLength) {
+        const row = boardState[currentRow];
+        const guess = row.letters.join('');
+
+        if (guess.length !== wordLength || row.letters.includes('')) {
             gameError.textContent = `Guess must be exactly ${wordLength} letters.`;
             return;
         }
 
         try {
-            const url = `/play-guess?gameID=${encodeURIComponent(currentGameId)}&playerName=${encodeURIComponent(currentPlayerName)}&guess=${encodeURIComponent(guess)}`;
+            const url =
+                `/play-guess?gameID=${encodeURIComponent(currentGameId)}&playerName=${encodeURIComponent(currentPlayerName)}&guess=${encodeURIComponent(guess)}`;
             const res = await fetch(url);
             const data = await res.json();
-
             handleGuessResponse(guess, data);
         } catch (err) {
             console.error('Error calling /play-guess:', err);
@@ -837,84 +1174,219 @@
     }
 
     function handleGuessResponse(guess, data) {
-        const gameError = document.getElementById('gameError');
+    const gameError = document.getElementById('gameError');
 
-        const status = data.status || 'UNKNOWN';
-        const pattern = data.pattern || '------';
-        const message = data.message || '';
+    const status = data.status || 'UNKNOWN';
+    const rawPattern = data.pattern;   // don't default yet
+    const message = data.message || '';
 
-        // Append to local history
-        guessHistory.push({
-            guess,
-            pattern,
-            status
-        });
-        renderGuessHistory();
+    // 1) Handle invalid word BEFORE touching board/keyboard
+    if (status === 'INVALID_WORD') {
+        gameError.textContent = message || 'Invalid word.';
+        // Do NOT color tiles
+        // Do NOT update keyboard
+        // Do NOT advance row
+        return;
+    }
 
-        // Update turn label if present
-        if (data.nextTurn) {
-            document.getElementById('gameCurrentTurnLabel').textContent = data.nextTurn;
+    // 2) For all other statuses, fall back to N's if pattern missing
+    const pattern = rawPattern || ''.padEnd(wordLength, 'N');
+
+    // update current row tiles with colors
+    applyPatternToRow(currentRow, guess, pattern);
+    updateKeyboardFromPattern(guess, pattern);
+
+    // update turn label if present
+    if (data.nextTurn) {
+        document.getElementById('gameCurrentTurnLabel').textContent = data.nextTurn;
+    }
+
+    if (status === 'NOT_YOUR_TURN') {
+        gameError.textContent = message || 'Not your turn.';
+        return;
+    }
+
+    if (status === 'WIN') {
+        const winner = data.winner || currentPlayerName;
+        document.getElementById('gameFooterStatus').textContent =
+            `Game over! Winner: ${winner}`;
+        gameError.textContent = '';
+        showEndActions();
+        return;
+    }
+
+    if (status === 'OK') {
+        gameError.textContent = '';
+        // advance to next row for next guess
+        if (currentRow < maxRows - 1) {
+            currentRow++;
+            currentCol = 0;
         }
+        return;
+    }
 
-        // Handle statuses
-        if (status === 'INVALID') {
-            gameError.textContent = message || 'Invalid word.';
-        } else if (status === 'NOT_YOUR_TURN') {
-            gameError.textContent = message || 'Not your turn.';
-        } else if (status === 'WIN') {
-            const winner = data.winner || currentPlayerName;
-            document.getElementById('gameFooterStatus').textContent =
-                `Game over! Winner: ${winner}`;
-            gameError.textContent = '';
-        } else if (status === 'OK') {
-            gameError.textContent = '';
-        } else {
-            // Fallback
-            gameError.textContent = message || `Status: ${status}`;
+    // fallback
+    gameError.textContent = message || `Status: ${status}`;
+}
+
+
+    function applyPatternToRow(rowIndex, guess, pattern) {
+        for (let i = 0; i < wordLength; i++) {
+            const tile = getTile(rowIndex, i);
+            const ch = pattern[i];
+
+            tile.classList.remove('tile-correct', 'tile-present', 'tile-absent');
+            tile.textContent = guess[i];
+
+            if (ch === 'G') tile.classList.add('tile-correct');
+            else if (ch === 'Y') tile.classList.add('tile-present');
+            else tile.classList.add('tile-absent');
         }
     }
 
-    function renderGuessHistory() {
-        const container = document.getElementById('guessHistory');
-        container.innerHTML = '';
+    function updateKeyboardFromPattern(guess, pattern) {
+        for (let i = 0; i < wordLength; i++) {
+            const letter = guess[i];
+            const result = pattern[i]; // G/Y/N
+            let newState;
+            if (result === 'G') newState = 'correct';
+            else if (result === 'Y') newState = 'present';
+            else newState = 'absent';
 
-        guessHistory.forEach(entry => {
-            const row = document.createElement('div');
-            row.className = 'guess-row';
-
-            const left = document.createElement('div');
-            left.textContent = entry.guess;
-
-            const right = document.createElement('div');
-
-            const tiles = document.createElement('div');
-            tiles.className = 'tiles';
-
-            const pattern = entry.pattern || '';
-            for (let i = 0; i < pattern.length; i++) {
-                const ch = pattern[i];
-                const tile = document.createElement('div');
-                tile.classList.add('tile');
-                if (ch === 'G') tile.classList.add('tile-g');
-                else if (ch === 'Y') tile.classList.add('tile-y');
-                else tile.classList.add('tile-n');
-
-                tile.textContent = ch;
-                tiles.appendChild(tile);
+            const oldState = keyboardState[letter];
+            // priority: correct > present > absent
+            if (!oldState ||
+                (oldState === 'absent' && (newState === 'present' || newState === 'correct')) ||
+                (oldState === 'present' && newState === 'correct')) {
+                keyboardState[letter] = newState;
             }
+        }
 
-            const status = document.createElement('div');
-            status.className = 'guess-status';
-            status.textContent = entry.status;
+        // apply to DOM
+        document.querySelectorAll('.key').forEach(btn => {
+            const letter = btn.dataset.key;
+            if (!/^[A-Z]$/.test(letter)) return;
+            btn.classList.remove('key-correct', 'key-present', 'key-absent');
 
-            right.appendChild(tiles);
-            right.appendChild(status);
-
-            row.appendChild(left);
-            row.appendChild(right);
-            container.appendChild(row);
+            const st = keyboardState[letter];
+            if (st === 'correct') btn.classList.add('key-correct');
+            else if (st === 'present') btn.classList.add('key-present');
+            else if (st === 'absent') btn.classList.add('key-absent');
         });
     }
+
+    async function fetchGuessHistory() {
+    if (!currentGameId) return;
+
+    try {
+        const res = await fetch(`/guess-history?gameID=${encodeURIComponent(currentGameId)}`);
+        const data = await res.json();
+        const guesses = data.guesses || [];
+
+        // Only rebuild if # changed
+        if (guesses.length === lastSyncedGuessCount) {
+            return;
+        }
+        lastSyncedGuessCount = guesses.length;
+
+        // wipe board and rebuild from scratch
+        const board = document.getElementById('board');
+        board.innerHTML = '';
+        boardState = [];
+        currentRow = 0;
+        currentCol = 0;
+
+        // build rows equal to guess count + 1 (an editable one)
+        for (let i = 0; i < guesses.length + 1; i++) {
+            appendNewBoardRow();
+        }
+
+        // fill previous guesses
+        guesses.forEach((item, index) => {
+         const guess = item.guess.toUpperCase();
+         const pattern = item.pattern;
+         const playerName = item.playerName;  // comes from backend GuessHistoryItem
+
+         // letters into row
+            for (let i = 0; i < Math.min(wordLength, guess.length); i++) {
+                boardState[index].letters[i] = guess[i];
+                const tile = getTile(index, i);
+               tile.textContent = guess[i];
+              tile.classList.add('filled');
+              }
+
+             applyPatternToRow(index, guess, pattern);
+             updateKeyboardFromPattern(guess, pattern);
+
+            // set bubble color + initial
+            setRowBubble(index, playerName);
+});
+
+        // editable row is next after last completed
+        currentRow = guesses.length;
+        currentCol = 0;
+
+    } catch (err) {
+        console.error('Error fetching guess history:', err);
+    }
+}
+
+       const btnRematch = document.getElementById('btnRematch');
+        const btnExit = document.getElementById('btnExit');
+    
+btnRematch.addEventListener('click', async () => {
+    const gameError = document.getElementById('gameError');
+    gameError.textContent = '';
+
+    if (!currentGameId || !currentPlayerName) {
+        gameError.textContent = 'You are not in a game.';
+        return;
+    }
+
+    try {
+        const url = `/rematch?gameID=${encodeURIComponent(currentGameId)}`;
+        const res = await fetch(url);
+        const data = await res.json();
+
+        if (data.status !== 'OK') {
+            gameError.textContent = data.message || 'Rematch failed.';
+            return;
+        }
+
+        if (data.wordLength) {
+            wordLength = data.wordLength;
+        }
+
+        if (data.currentTurn) {
+            document.getElementById('gameCurrentTurnLabel').textContent =
+                resolveTurnLabel(data.currentTurn);
+        }
+
+        hideEndActions();
+        initBoard();
+        lastSyncedGuessCount = 0;
+
+        document.getElementById('gameFooterStatus').textContent = 'Game in progress...';
+
+    } catch (err) {
+        console.error('Error starting rematch:', err);
+        gameError.textContent = 'Error starting rematch.';
+    }
+});
+
+const btnHowToBack = document.getElementById('btnHowToBack');
+btnHowToBack.addEventListener('click', () => {
+    showSection(landingSection);
+});
+
+
+btnExit.addEventListener('click', () => {
+    hideEndActions();
+    inGame = false;
+    currentGameId = null;
+    showSection(landingSection);
+});
+
 </script>
 </body>
 </html>

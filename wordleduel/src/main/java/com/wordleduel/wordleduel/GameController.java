@@ -125,6 +125,8 @@ public class GameController {
                 String secretWord = session.getSecretWord();
                 String evaluation = guessService.guessChecker(secretWord, guess);
 
+                session.addGuess(playerName, guess, evaluation);
+
                 boolean allGreen = evaluation.chars().allMatch(ch -> ch =='G');
                 
                 if(allGreen) {
@@ -226,4 +228,45 @@ public class GameController {
                             session.getCurrentTurn()
                     );
                 }
+
+                @GetMapping("/guess-history")
+                public GuessHistoryResponse guessHistory(@RequestParam String gameID) {
+                  GameSession session = gameSessionService.getGame(gameID);
+                     if (session == null) {
+                        return new GuessHistoryResponse(gameID, java.util.Collections.emptyList());
+                     }
+
+                     java.util.List<GuessHistoryItem> dto = new java.util.ArrayList<>();
+                       for (GameSession.GuessRecord gr : session.getGuessHistory()) {
+                         dto.add(new GuessHistoryItem(gr.getPlayerName(), gr.getGuess(), gr.getEvaluation()));
+                           }
+                         return new GuessHistoryResponse(gameID, dto);
+                }
+
+                @GetMapping("/rematch")
+                    public RematchResponse rematch(@RequestParam String gameID) {
+                        GameSession session = gameSessionService.getGame(gameID);
+                        if (session == null) {
+                            return new RematchResponse(
+                                    "INVALID_GAME",
+                                    "Game not found.",
+                                    null,
+                                    null
+                            );
+                        }
+                        
+                        String newSecret = wordService.getRandomWord();
+                        session.resetForRematch(newSecret);
+
+                        return new RematchResponse(
+                                "OK",
+                                "Rematch started.",
+                                newSecret.length(),
+                                session.getCurrentTurn()
+                        );
+                    }
+
+
+
+
  }

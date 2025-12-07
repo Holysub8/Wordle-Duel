@@ -1,5 +1,6 @@
 package com.wordleduel.wordleduel;
 
+
 public class GameStateResponse {
 
     private String gameID;
