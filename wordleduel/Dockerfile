@@ -8,4 +8,6 @@ RUN chmod +x mvnw && ./mvnw -DskipTests package
 
 EXPOSE 8080
 
-CMD ["java","-jar","target/*.jar"]
+# use sh so target/*.jar gets expanded
+CMD ["sh", "-c", "java -jar target/*.jar"]
+
