@@ -10,6 +10,7 @@ public class GameStateResponse {
     private boolean gameOver;
     private String currentTurn; 
     private String winner;
+    private int matchId;
 
     public GameStateResponse(String gameID,
                              String player1Name,
@@ -17,7 +18,8 @@ public class GameStateResponse {
                              boolean gameStarted,
                              boolean gameOver,
                              String currentTurn,
-                             String winner) {
+                             String winner,
+                             int matchId) {
         this.gameID = gameID;
         this.player1Name = player1Name;
         this.player2Name = player2Name;
@@ -25,6 +27,7 @@ public class GameStateResponse {
         this.gameOver = gameOver;
         this.currentTurn = currentTurn;
         this.winner = winner;
+        this.matchId = matchId;
     }
 
     public String getGameID() { return gameID; }
@@ -34,4 +37,5 @@ public class GameStateResponse {
     public boolean isGameOver() { return gameOver; }
     public String getCurrentTurn() { return currentTurn; }
     public String getWinner() { return winner; }
+    public int getMatchId() { return matchId; }
 }

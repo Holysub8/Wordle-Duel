@@ -172,7 +172,8 @@ public class GameController {
                                 false,
                                 false,
                                 null,
-                                null
+                                null,
+                                0
                         );
                     }
 
@@ -183,7 +184,9 @@ public class GameController {
                             session.isGameStarted(),
                             session.isGameOver(),
                             session.getCurrentTurn(),
-                            session.getWinner()
+                            session.getWinner(),
+                            session.getMatchId()
+
                     );
                 }
 
@@ -251,6 +254,7 @@ public class GameController {
                                     "INVALID_GAME",
                                     "Game not found.",
                                     null,
+                                    null,
                                     null
                             );
                         }
@@ -262,7 +266,8 @@ public class GameController {
                                 "OK",
                                 "Rematch started.",
                                 newSecret.length(),
-                                session.getCurrentTurn()
+                                session.getCurrentTurn(),
+                                session.getMatchId()
                         );
                     }
 

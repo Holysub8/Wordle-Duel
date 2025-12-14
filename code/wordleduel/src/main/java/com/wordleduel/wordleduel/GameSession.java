@@ -15,8 +15,9 @@ public class GameSession {
 
     private boolean isGameOver = false;
     private String winner = null;
-
     private boolean gameStarted = false;
+
+    private int matchId = 1;
 
     // ===== Guess history support =====
     public static class GuessRecord {
@@ -58,6 +59,10 @@ public class GameSession {
         this.gameID = gameID;
         this.secretWord = secretWord;
         this.currentTurn = "player1";
+    }
+
+    public int getMatchId(){
+        return matchId;
     }
 
     public String getGameID() {
@@ -123,7 +128,8 @@ public class GameSession {
     this.isGameOver = false;
     this.winner = null;
     this.gameStarted = true;     
-    this.guessHistory.clear();   
+    this.guessHistory.clear();
+    this.matchId++;   
 }
 
 }

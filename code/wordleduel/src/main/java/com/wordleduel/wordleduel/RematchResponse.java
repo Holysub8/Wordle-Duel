@@ -6,12 +6,18 @@ public class RematchResponse {
     private final String message;
     private final Integer wordLength;
     private final String currentTurn;
+    private final Integer matchId;
 
-    public RematchResponse(String status, String message, Integer wordLength, String currentTurn) {
+    public RematchResponse(String status, String message, Integer wordLength, String currentTurn, Integer matchId) {
         this.status = status;
         this.message = message;
         this.wordLength = wordLength;
         this.currentTurn = currentTurn;
+        this.matchId = matchId;
+    }
+
+    public Integer getMatchId() {
+        return matchId;
     }
 
     public String getStatus() {

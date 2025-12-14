@@ -600,6 +600,8 @@
     let keyboardListenerAttached = false;
     let inGame = false; // to avoid re-entering game screen repeatedly
     let lastSyncedGuessCount = 0;
+    let currentMatchId = null;
+
 
 
     const COLORS = [
@@ -901,11 +903,7 @@
 
         // Match status in lobby
         const matchStatusEl = document.getElementById('lobbyMatchStatus');
-        if (data.gameStarted) {
-            matchStatusEl.textContent = 'Match started.';
-        } else {
-            matchStatusEl.textContent = 'Not started';
-        }
+        matchStatusEl.textContent = data.gameStarted ? 'Match started.' : 'Not started';
 
         // Enable Start Match only if host, opponent joined, not started
         if (currentPlayerRole === 'player1' && opponentJoined && !data.gameStarted) {
@@ -918,6 +916,28 @@
         if (data.gameStarted && !inGame) {
             inGame = true;
             enterGameScreen(data);
+        }
+
+        // ===== NEW: matchId sync (detect rematch for BOTH players) =====
+        if (inGame) {
+            // initialize local match id once
+            if (currentMatchId === null && data.matchId != null) {
+                currentMatchId = data.matchId;
+            }
+
+            // if matchId changed, rematch happened (even if you didn't click)
+            if (data.matchId != null && currentMatchId != null && data.matchId !== currentMatchId) {
+                currentMatchId = data.matchId;
+
+                // keep turn label correct after reset
+                if (data.currentTurn) {
+                    document.getElementById('gameCurrentTurnLabel').textContent =
+                        resolveTurnLabel(data.currentTurn);
+                }
+
+                // full UI reset (board + keyboard)
+                resetUiForNewMatch();
+            }
         }
 
         // While in game, keep "Current turn" label accurate from server
@@ -944,8 +964,14 @@
 
 
 
+
     function enterGameScreen(latestState) {
         inGame = true;
+
+        if (latestState.matchId != null) {
+    currentMatchId = latestState.matchId;
+}
+
 
         document.getElementById('gamePlayerName').textContent = currentPlayerName || '–';
         document.getElementById('gameOpponentName').textContent = opponentName || '–';
@@ -1043,6 +1069,28 @@
     const color = getColorForPlayerName(playerName);
     bubble.style.backgroundColor = color;
     }
+
+    function resetUiForNewMatch() {
+    hideEndActions();
+
+    // wipe board + rebuild to 1 empty row
+    initBoard();
+
+    // wipe keyboard colors + state
+    Object.keys(keyboardState).forEach(k => delete keyboardState[k]);
+    document.querySelectorAll('.key').forEach(btn => {
+        btn.classList.remove('key-correct', 'key-present', 'key-absent');
+    });
+
+    // force guess history to rebuild from scratch
+    lastSyncedGuessCount = -1;
+    fetchGuessHistory();
+
+    document.getElementById('gameFooterStatus').textContent = 'Game in progress...';
+    document.getElementById('gameError').textContent = '';
+}
+
+
 
 
 
@@ -1344,7 +1392,7 @@ btnRematch.addEventListener('click', async () => {
     }
 
     try {
-        const url = `/rematch?gameID=${encodeURIComponent(currentGameId)}`;
+        const url = `/rematch?gameID=${encodeURIComponent(currentGameId)}&playerName=${encodeURIComponent(currentPlayerName)}`;
         const res = await fetch(url);
         const data = await res.json();
 
@@ -1362,17 +1410,19 @@ btnRematch.addEventListener('click', async () => {
                 resolveTurnLabel(data.currentTurn);
         }
 
-        hideEndActions();
-        initBoard();
-        lastSyncedGuessCount = 0;
+        // NEW: capture matchId so you don't instantly re-trigger
+        if (data.matchId != null) {
+            currentMatchId = data.matchId;
+        }
 
-        document.getElementById('gameFooterStatus').textContent = 'Game in progress...';
+        resetUiForNewMatch();
 
     } catch (err) {
         console.error('Error starting rematch:', err);
         gameError.textContent = 'Error starting rematch.';
     }
 });
+
 
 const btnHowToBack = document.getElementById('btnHowToBack');
 btnHowToBack.addEventListener('click', () => {
